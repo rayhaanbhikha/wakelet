@@ -36,13 +36,13 @@ type Properties struct {
 	Categories           []Categories `json:"categories"`
 	GeometryDates        []string     `json:"geometryDates"`
 	Sources              []Sources    `json:"sources"`
-	Geometry             Geometry     `json:"geometry"`
 }
 
 // Event ...
 type Event struct {
 	Type       string     `json:"type"`
 	Properties Properties `json:"properties"`
+	Geometry   Geometry   `json:"geometry"`
 }
 
 // Events ...
