@@ -9,6 +9,12 @@ export enum DBSortBy {
   Date = 'date',
 }
 
+export interface IScanOptions {
+  sortBy?: string,
+  offsetId?: string,
+  limit?: number
+}
+
 class DBService {
   private dbClient: DynamoDB;
   private dbDocumentClient: DynamoDB.DocumentClient;
@@ -138,7 +144,7 @@ class DBService {
     }
   }
 
-  private getIndex(sortBy?: string) {
+  private getIndex(sortBy: string) {
     switch (sortBy?.toLowerCase()) {
       case DBSortBy.Title:
         return this.indexes.TypeTitleIndex.IndexName
@@ -150,18 +156,21 @@ class DBService {
     }
   }
 
-  async scan({ sortBy, offsetId}: { sortBy?: string, offsetId?: string }) {
+  async scan({sortBy = DBSortBy.Id, offsetId='', limit = 10}: IScanOptions) {
 
     const params: DynamoDB.DocumentClient.ScanInput = {
       TableName: this.tableName,
-      Limit: 2,
+      Limit: limit,
       IndexName: this.getIndex(sortBy),
     }
 
     if (offsetId) {
-      const cursor = decodeCursor(offsetId)
-      console.log("CURSOR: ", cursor);
-      params.ExclusiveStartKey = cursor;
+      try {
+        params.ExclusiveStartKey = decodeCursor(offsetId)
+      } catch (error) {
+        console.log("failed to parse offset id")
+        console.log(error.message);
+      }
     }
 
     const result = await this.dbDocumentClient.scan(params).promise();
