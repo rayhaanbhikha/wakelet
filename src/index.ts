@@ -5,18 +5,6 @@ import { nasaService } from './services/nasa.service';
 
 const app = express();
 
-const errorHandlerMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  try {
-    next();
-  } catch (error) {
-    console.error("there was an error");
-    res.status(500).send("Server error")
-  }
-};
-
-// app.use(errorHandlerMiddleware);
-
-
 app.get("/health", (req, res) => {
   res.send("status ok")
 });
