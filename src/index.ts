@@ -43,11 +43,11 @@ app.get("/v1/events", async (req, res) => {
 
 const serverInit = async () => {
   try {
-    await provisionDB();
+    await provisionDB(envs.SEED_LIMIT);
     app.listen(envs.PORT, () => console.log(`server started on port ${envs.PORT}`))
   } catch (error) {
     console.error(error);
-    process.exit(0);
+    process.exit(1);
   }
 }
 

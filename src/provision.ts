@@ -1,22 +1,15 @@
 import { dbService } from "./db";
-import { envs } from "./envs";
 import { nasaService } from "./services/nasa.service";
 
-export async function provisionDB() {
+export async function provisionDB(seedLimit: number) {
   console.log("Provisioning DB");
-  try {
-    await dbService.createTable();
+  await dbService.createTable();
 
-    const result = await dbService.scan({ limit: envs.SEED_LIMIT })
-    
-    const numberOfNasaEvents = result.data?.length || 0
-
-    if (numberOfNasaEvents < envs.SEED_LIMIT) {
-      const nasaEvents = await nasaService.getEventsFromAPI();
-      await dbService.batchWrite(nasaEvents);
-    }
-  } catch (error) {
-    console.error("PROVISION ERROR", error);
-    process.exit(1)
+  const result = await dbService.scan({ limit: seedLimit })
+  
+  const numberOfNasaEvents = result.data?.length || 0
+  if (numberOfNasaEvents < seedLimit) {
+    const nasaEvents = await nasaService.getEventsFromAPI();
+    await dbService.batchWrite(nasaEvents);
   }
 }

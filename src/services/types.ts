@@ -1,6 +1,6 @@
 interface Category {
   id: string
-  url: string
+  title: string
 }
 
 interface Source {
@@ -22,7 +22,7 @@ export interface Event {
   title: string
   description?: string
   link: string
-  closed: string
+  closed: string | null
   categories: Category[],
   sources: Source[]
   geometry: Geometry[]
