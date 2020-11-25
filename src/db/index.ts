@@ -1,8 +1,8 @@
-import { DynamoDB, Endpoint } from 'aws-sdk';
-import { decodeCursor, generateCursor } from '../utils/cursor';
+import { DynamoDB } from 'aws-sdk';
+import { generateCursor } from '../utils/cursor';
 import { NasaEvent } from '../services/nasa.service';
-import * as dbConfig from './config';
-import { GlobalSecondaryIndex } from './utils';
+import { tableName, attributeKeyMap, globalSecondaryIndexMap, keySchema } from './config';
+import { createTableParams, GlobalSecondaryIndex } from './utils';
 import { envs } from '../envs';
 
 export enum DBSortBy {
@@ -30,23 +30,18 @@ class DBService {
     this.dbClient = new DynamoDB(clientConfig);
   }
 
-  private createTableParams() {
-    return {
-      TableName: dbConfig.tableName,
-      KeySchema: dbConfig.dbDefaultKeySchema,
-      AttributeDefinitions: Object.values(dbConfig.attributeKeys).map(attribute => attribute.definition),
-      GlobalSecondaryIndexes: Object.values(dbConfig.globalSecondaryIndexes).map(index => index.definition),
-      BillingMode: "PAY_PER_REQUEST"
-    };
-  }
-
   async createTable() {
-    const params: DynamoDB.CreateTableInput = this.createTableParams();
     try {
+      const params: DynamoDB.CreateTableInput = createTableParams({
+        tableName,
+        attributeKeyMap,
+        globalSecondaryIndexMap,
+        keySchema
+      });
       await this.dbClient.createTable(params).promise()
     } catch (error) {
       if (error?.code === 'ResourceInUseException') {
-        console.log(`${dbConfig.tableName} table already exists`)
+        console.log(`${tableName} table already exists`)
         return
       } else {
         throw error
@@ -57,14 +52,14 @@ class DBService {
   async batchWrite(nasaEvents: NasaEvent[]) {
     const params: DynamoDB.DocumentClient.BatchWriteItemInput = {
       RequestItems: {
-        [dbConfig.tableName]: nasaEvents.map(nasaEvent => ({
+        [tableName]: nasaEvents.map(nasaEvent => ({
           PutRequest: {
             Item: {
               ...nasaEvent,
-              [dbConfig.attributeKeys.type.name]: 'nasaEvent',
-              [dbConfig.attributeKeys.id.name]: nasaEvent.id,
-              [dbConfig.attributeKeys.date.name]: nasaEvent.date,
-              [dbConfig.attributeKeys.title.name]: nasaEvent.title
+              [attributeKeyMap.type.name]: 'nasaEvent',
+              [attributeKeyMap.id.name]: nasaEvent.id,
+              [attributeKeyMap.date.name]: nasaEvent.date,
+              [attributeKeyMap.title.name]: nasaEvent.title
             }
           }
         }))
@@ -76,11 +71,11 @@ class DBService {
   getIndex(sortBy: string) {
     switch (sortBy?.toLowerCase()) {
       case DBSortBy.Title:
-        return dbConfig.globalSecondaryIndexes.TypeTitleIndex
+        return globalSecondaryIndexMap.TypeTitleIndex
       case DBSortBy.Date:
-        return dbConfig.globalSecondaryIndexes.TypeDateIndex
+        return globalSecondaryIndexMap.TypeDateIndex
       case DBSortBy.Id:
-          return dbConfig.globalSecondaryIndexes.TypeIdIndex
+          return globalSecondaryIndexMap.TypeIdIndex
       default:
         return undefined;
     }
@@ -89,7 +84,7 @@ class DBService {
   async scan({index, cursor, limit}: IScanOptions) {
 
     const params: DynamoDB.DocumentClient.ScanInput = {
-      TableName: dbConfig.tableName,
+      TableName: tableName,
       Limit: limit,
       IndexName: index?.name,
     }

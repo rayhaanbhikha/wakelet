@@ -2,24 +2,24 @@ import { DBAttribute, GlobalSecondaryIndex, generateHashKey, generateRangeKey} f
 
 export const tableName = "NasaEvents"
 
-export const attributeKeys = {
+export const attributeKeyMap = {
   type: new DBAttribute('type', 'S'),
   id:new DBAttribute('id', 'S'),
   title:new DBAttribute('title', 'S'),
   date:new DBAttribute('date', 'S'),
 }
 
-export const dbDefaultKeySchema = [
-  generateHashKey(attributeKeys.id.name),
-  generateRangeKey(attributeKeys.title.name),
+export const keySchema = [
+  generateHashKey(attributeKeyMap.id.name),
+  generateRangeKey(attributeKeyMap.title.name),
 ];
 
 
-export const globalSecondaryIndexes = {
+export const globalSecondaryIndexMap = {
   // sort by id
-  TypeIdIndex: new GlobalSecondaryIndex('TypeIdIndex', attributeKeys.type.name, attributeKeys.id.name),
+  TypeIdIndex: new GlobalSecondaryIndex('TypeIdIndex', attributeKeyMap.type.name, attributeKeyMap.id.name),
   // sort by title
-  TypeTitleIndex: new GlobalSecondaryIndex('TypeTitleIndex', attributeKeys.type.name, attributeKeys.title.name),
+  TypeTitleIndex: new GlobalSecondaryIndex('TypeTitleIndex', attributeKeyMap.type.name, attributeKeyMap.title.name),
   // sort by date
-  TypeDateIndex: new GlobalSecondaryIndex('TypeDateIndex', attributeKeys.type.name, attributeKeys.date.name)
+  TypeDateIndex: new GlobalSecondaryIndex('TypeDateIndex', attributeKeyMap.type.name, attributeKeyMap.date.name)
 }
