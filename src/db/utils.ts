@@ -1,4 +1,4 @@
-import { AttributeDefinition, KeySchema } from "aws-sdk/clients/dynamodb";
+import { AttributeDefinition } from "aws-sdk/clients/dynamodb";
 
 export const generateHashKey = (key: string) => ({
   AttributeName: key,
@@ -35,21 +35,4 @@ export class GlobalSecondaryIndex {
       }
     }
   }
-}
-
-interface ICreateTableParams {
-  tableName: string,
-  keySchema: KeySchema,
-  attributeKeyMap: Record<string, DBAttribute>,
-  globalSecondaryIndexMap: Record<string, GlobalSecondaryIndex>
-}
-
-export const createTableParams = ({ tableName, keySchema, attributeKeyMap, globalSecondaryIndexMap}: ICreateTableParams) => {
-  return {
-    TableName: tableName,
-    KeySchema: keySchema,
-    AttributeDefinitions: Object.values(attributeKeyMap).map(attribute => attribute.definition),
-    GlobalSecondaryIndexes: Object.values(globalSecondaryIndexMap).map(index => index.definition),
-    BillingMode: "PAY_PER_REQUEST"
-  };
 }

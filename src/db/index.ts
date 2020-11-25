@@ -1,8 +1,10 @@
 import { DynamoDB } from 'aws-sdk';
+import { DocumentClient } from 'aws-sdk/clients/dynamodb';
+
 import { generateCursor } from '../utils/cursor';
 import { NasaEvent } from '../services/nasa.service';
 import { tableName, attributeKeyMap, globalSecondaryIndexMap, keySchema } from './config';
-import { createTableParams, GlobalSecondaryIndex } from './utils';
+import { GlobalSecondaryIndex } from './utils';
 import { envs } from '../envs';
 
 export enum DBSortBy {
@@ -17,7 +19,7 @@ export interface IScanOptions {
   limit: number
 }
 
-class DBService {
+export class DBService {
   private client: DynamoDB.DocumentClient;
   private dbClient: DynamoDB;
 
@@ -26,18 +28,23 @@ class DBService {
       region: envs.AWS_REGION,
       endpoint: process.env.DYNAMO_DB_ENDPOINT
     }
-    this.client = new DynamoDB.DocumentClient(clientConfig)
+    this.client = new DocumentClient(clientConfig)
     this.dbClient = new DynamoDB(clientConfig);
+  }
+
+  createTableParams() {
+    return {
+      TableName: tableName,
+      KeySchema: keySchema,
+      AttributeDefinitions: Object.values(attributeKeyMap).map(attribute => attribute.definition),
+      GlobalSecondaryIndexes: Object.values(globalSecondaryIndexMap).map(index => index.definition),
+      BillingMode: "PAY_PER_REQUEST"
+    };
   }
 
   async createTable() {
     try {
-      const params: DynamoDB.CreateTableInput = createTableParams({
-        tableName,
-        attributeKeyMap,
-        globalSecondaryIndexMap,
-        keySchema
-      });
+      const params: DynamoDB.CreateTableInput = this.createTableParams();
       await this.dbClient.createTable(params).promise()
     } catch (error) {
       if (error?.code === 'ResourceInUseException') {
