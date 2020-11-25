@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios';
 import { envs } from '../envs';
-import { AxiosEventsAPIResponse, Event, Geometry } from '../types';
+import { AxiosEventsAPIResponse, Event, Geometry } from './types';
 
 export type NasaEvent = Omit<Event, 'geometry'> & Geometry & { type: string };
 
@@ -9,7 +9,7 @@ class NasaService {
   constructor() {
     this.axios = axios.create({
       baseURL: envs.NASA_EVENTS_BASE_URL,
-      timeout: 1000
+      timeout: 30_000
     });
    }
   
@@ -17,13 +17,11 @@ class NasaService {
     const res = await this.axios.get<AxiosEventsAPIResponse>('api/v3/events', {
       params: {
         status: "OPEN",
-        limit: 1
+        limit: envs.SEED_LIMIT
       }
     });
   
-    
-    const events = res.data.events.map(this.formatEvent).flat();
-    return events;
+    return res.data.events.map(this.formatEvent).flat();
   }
 
   private formatEvent = (event: Event): NasaEvent[] => {

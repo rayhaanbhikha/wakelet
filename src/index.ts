@@ -1,7 +1,9 @@
-import express, { Request, Response, NextFunction } from 'express'
-import { dbService } from './services/db.service';
+import express, { urlencoded } from 'express'
+import { dbService } from './db';
 import { envs } from './envs';
-import { nasaService } from './services/nasa.service';
+import { provisionDB } from './provision';
+import { URLSearchParams } from 'url'
+import { decodeCursor } from './utils/cursor';
 
 const app = express();
 
@@ -10,33 +12,32 @@ app.get("/health", (req, res) => {
 });
 
 app.get("/v1/events", async (req, res) => {
+  try {
+    let { sortBy, offsetId, limit } = req.query as { sortBy: string, offsetId: string, limit: string }
 
-  const { sortBy, offsetId } = req.query as { sortBy: string, offsetId: string };
+    const cursor = offsetId ? decodeCursor(offsetId) : '';
+    const index = dbService.getIndex(sortBy);
+    const scanLimit = limit ? parseInt(limit) : envs.DEFAULT_SCAN_LIMIT
 
-  const result = await dbService.scan({ sortBy, offsetId })
-  
-  res.json(result);
-// res.send("ok")/;
+    console.log({ index: index?.name, cursor, limit: scanLimit })
+
+    const result = await dbService.scan({ index, cursor, limit: scanLimit })
+    
+    res.json(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server error");
+  }
 });
 
-
-if (envs.ENVIRONMENT != "prod") {
-  app.post("/v1/provision", async (req, res) => {
-    // TODO: error handling
-    await dbService.deleteTable();
-    await dbService.createTable();
-  
-    // TODO: could wait for table to be ready.
-  
-    res.send("Provisioned successfully");
-  })
-  
-  app.post("/v1/seed", async (req, res) => {
-    const nasaEvents = await nasaService.getEventsFromAPI();
-    await dbService.batchWrite(nasaEvents);
-  
-    res.send("Table populated with NasaEvents");
-  })
+const serverInit = async () => {
+  try {
+    await provisionDB();
+    app.listen(envs.PORT, () => console.log(`server started on port ${envs.PORT}`))
+  } catch (error) {
+    console.error(error);
+    process.exit(0);
+  }
 }
 
-app.listen(envs.PORT, () => console.log(`server started on port ${envs.PORT}`))
+serverInit();
