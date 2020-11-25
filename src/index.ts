@@ -1,8 +1,7 @@
-import express, { urlencoded } from 'express'
+import express from 'express'
 import { dbService } from './db';
 import { envs } from './envs';
 import { provisionDB } from './provision';
-import { URLSearchParams } from 'url'
 import { decodeCursor } from './utils/cursor';
 
 const app = express();
