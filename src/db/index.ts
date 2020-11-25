@@ -1,8 +1,9 @@
-import { DynamoDB } from 'aws-sdk';
+import { DynamoDB, Endpoint } from 'aws-sdk';
 import { decodeCursor, generateCursor } from '../utils/cursor';
 import { NasaEvent } from '../services/nasa.service';
 import * as dbConfig from './config';
 import { GlobalSecondaryIndex } from './utils';
+import { envs } from '../envs';
 
 export enum DBSortBy {
   Title = 'title',
@@ -12,7 +13,7 @@ export enum DBSortBy {
 
 export interface IScanOptions {
   index?: GlobalSecondaryIndex,
-  cursor?: string,
+  cursor?: DynamoDB.DocumentClient.Key,
   limit: number
 }
 
@@ -21,13 +22,12 @@ class DBService {
   private dbClient: DynamoDB;
 
   constructor() {
-    this.client = new DynamoDB.DocumentClient({
-      region: dbConfig.region
-    })
-
-    this.dbClient = new DynamoDB({
-      region: dbConfig.region,
-    });
+    const clientConfig = {
+      region: envs.AWS_REGION,
+      endpoint: process.env.DYNAMO_DB_ENDPOINT
+    }
+    this.client = new DynamoDB.DocumentClient(clientConfig)
+    this.dbClient = new DynamoDB(clientConfig);
   }
 
   private createTableParams() {
@@ -45,7 +45,6 @@ class DBService {
     try {
       await this.dbClient.createTable(params).promise()
     } catch (error) {
-      console.log(error);
       if (error?.code === 'ResourceInUseException') {
         console.log(`${dbConfig.tableName} table already exists`)
         return
@@ -96,7 +95,7 @@ class DBService {
     }
 
     if (cursor) {
-      params.ExclusiveStartKey = decodeCursor(cursor)
+      params.ExclusiveStartKey = cursor
     }
 
     const result = await this.client.scan(params).promise();

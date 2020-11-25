@@ -2,8 +2,6 @@ import { DBAttribute, GlobalSecondaryIndex, generateHashKey, generateRangeKey} f
 
 export const tableName = "NasaEvents"
 
-export const region = 'us-east-1'
-
 export const attributeKeys = {
   type: new DBAttribute('type', 'S'),
   id:new DBAttribute('id', 'S'),
