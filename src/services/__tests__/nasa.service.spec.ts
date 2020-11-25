@@ -1,13 +1,9 @@
 import axios from 'axios';
 import MockAdaper from 'axios-mock-adapter';
-import { formattedNasaEvent, nasaEvent } from '../../__mock__/nasa-event';
-
+import { formattedNasaEvent, nasaEvent } from '../../__mocks__/nasa-event';
 import { NasaService } from '../nasa.service';
 
 const mock = new MockAdaper(axios);
-
-
-
 
 describe('Nasa Service', () => {
   

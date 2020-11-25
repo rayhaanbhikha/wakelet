@@ -1,7 +1,7 @@
 import { dbService } from '../db';
 import { provisionDB } from '../provision';
 import { nasaService } from '../services/nasa.service';
-import { formattedNasaEvent } from '../__mock__/nasa-event';
+import { formattedNasaEvent } from '../__mocks__/nasa-event';
 
 describe('Provision', () => {
   
