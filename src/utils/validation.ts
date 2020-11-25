@@ -1,4 +1,4 @@
-type QueryParam = string | string[] | undefined;
+export type QueryParam = string | string[] | undefined;
 
 export const validateSortBy = (sortBy: QueryParam, defaultValue: string) => {
   return typeof sortBy === 'string' ? sortBy : defaultValue; 
