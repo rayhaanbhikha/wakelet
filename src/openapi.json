@@ -1,0 +1,178 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "description": "This API returns a subset of NasaEvents.",
+    "version": "1.0.0-oas3",
+    "title": "Custom NasaEvent API"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "health check",
+        "description": "Return the status ok.",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/v1/events": {
+      "get": {
+        "summary": "Nasa events",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "nullable": true,
+              "enum": [
+                "date",
+                "title",
+                "id"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "description": "Number of items to return per request.",
+            "schema": {
+              "type": "number",
+              "nullable": true
+            }
+          },
+          {
+            "in": "query",
+            "name": "offsetId",
+            "description": "Offset Id to use. This Id should come from the previous API request.",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "search results matching criteria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Event"
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "offsetId": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Event": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "link": {
+            "type": "string"
+          },
+          "closed": {
+            "type": "string"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            }
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Source"
+            }
+          },
+          "geometry": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Geometry"
+            }
+          }
+        }
+      },
+      "Category": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "Source": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "Geometry": {
+        "properties": {
+          "magnitudeValue": {
+            "type": "number"
+          },
+          "magnitudeUnit": {
+            "type": "string"
+          },
+          "magnitudeDescription": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "coordinates": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    }
+  }
+}

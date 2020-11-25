@@ -1,4 +1,4 @@
-interface Categories {
+interface Category {
   id: string
   url: string
 }
@@ -23,7 +23,7 @@ export interface Event {
   description?: string
   link: string
   closed: string
-  categories: Categories[],
+  categories: Category[],
   sources: Source[]
   geometry: Geometry[]
 }
