@@ -10,7 +10,7 @@ docker-compose up
 
 This will spin up a local DynamoDB table and then start the API service in a docker container. The API service will create the `NasaEvents` table in Dynamo and seed it with an arbitrary number of NasaEvents (this is configurable) before starting the server on port 8080.
 
-To view the API contract go to `http://localhost:8080/v1/api-docs`.
+To view the API contract go to http://localhost:8080/v1/api-docs.
 
 ## Run Locally
 
