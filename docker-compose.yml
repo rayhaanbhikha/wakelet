@@ -1,6 +1,20 @@
 version: "3.8"
 services:
-  db:
+  dynamoDB:
     image: amazon/dynamodb-local:1.13.5
     ports:
       - 8000:8000
+  api:
+    build:
+      context: .
+      target: prod
+    depends_on: 
+      - dynamoDB
+    ports:
+      - 8080:8080
+    environment:
+      - AWS_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=some-key
+      - AWS_SECRET_ACCESS_KEY=some-key
+      - PORT=8080
+      - DYNAMO_DB_ENDPOINT=http://dynamoDB:8000
