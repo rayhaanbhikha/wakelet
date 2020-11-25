@@ -1,4 +1,5 @@
 import { DBSortBy } from '..'
+import { formattedNasaEvent } from '../../__mocks__/nasa-event'
 import { globalSecondaryIndexMap } from '../config'
 
 describe('DB service', () => {
@@ -65,7 +66,41 @@ describe('DB service', () => {
     expect(dbService.getIndex(sortBy)).toEqual(expectedIndex);
   })
 
-  it.todo('should invoke batchWrite method with correct params');
+  it('should invoke batchWrite method with correct params', async () => {
+    const batchWriteSpy = jest.fn().mockReturnValue({
+      promise: jest.fn()
+    });
+
+    jest.mock('aws-sdk/clients/dynamodb', () => ({
+      DocumentClient: jest.fn().mockImplementation(() => ({
+        batchWrite: batchWriteSpy
+      }))
+    }));
+
+    const { DBService } = await import('../index');
+    const dbService = new DBService();
+
+    await dbService.batchWrite([formattedNasaEvent]);
+
+    expect(batchWriteSpy).toHaveBeenCalledWith({
+      RequestItems:{
+        NasaEvents:[
+        {
+          PutRequest:{
+            Item:{
+              ...formattedNasaEvent,
+              'id': formattedNasaEvent.id,
+              'date': formattedNasaEvent.date,
+              'title': formattedNasaEvent.title,
+              type:"nasaEvent"
+            }
+          }
+        }
+        ]
+      }
+   })
+
+  });
   
   describe('Scan', () => {})
 })
