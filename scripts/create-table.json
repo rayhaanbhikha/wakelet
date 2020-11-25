@@ -1,30 +1,30 @@
 {
   "AttributeDefinitions": [
     {
-      "AttributeName": "Type",
+      "AttributeName": "type",
       "AttributeType": "S"
     },
     {
-      "AttributeName": "Id",
+      "AttributeName": "id",
       "AttributeType": "S"
     },
     {
-      "AttributeName": "Title",
+      "AttributeName": "title",
       "AttributeType": "S"
     },
     {
-      "AttributeName": "Date",
+      "AttributeName": "date",
       "AttributeType": "S"
     }
   ],
   "TableName": "NasaEvents",
   "KeySchema": [
     {
-      "AttributeName": "Type",
+      "AttributeName": "id",
       "KeyType": "HASH"
     },
     {
-      "AttributeName": "Id",
+      "AttributeName": "title",
       "KeyType": "RANGE"
     }
   ],
@@ -33,11 +33,11 @@
       "IndexName": "TypeTitleIndex",
       "KeySchema": [
         {
-          "AttributeName": "Type",
+          "AttributeName": "type",
           "KeyType": "HASH"
         },
         {
-          "AttributeName": "Title",
+          "AttributeName": "title",
           "KeyType": "RANGE"
         }
       ],
@@ -49,11 +49,27 @@
       "IndexName": "TypeDateIndex",
       "KeySchema": [
         {
-          "AttributeName": "Type",
+          "AttributeName": "type",
           "KeyType": "HASH"
         },
         {
-          "AttributeName": "Date",
+          "AttributeName": "date",
+          "KeyType": "RANGE"
+        }
+      ],
+      "Projection": {
+        "ProjectionType": "ALL"
+      }
+    },
+    {
+      "IndexName": "TypeIdIndex",
+      "KeySchema": [
+        {
+          "AttributeName": "type",
+          "KeyType": "HASH"
+        },
+        {
+          "AttributeName": "id",
           "KeyType": "RANGE"
         }
       ],

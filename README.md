@@ -24,6 +24,20 @@ yarn build # convert from from typescript to js
 yarn start # start the api service locally on port 8080.
 
 ```
+
+## Manually Provision DB
+
+You can also manually run commands on the local AWS DynamoDB table using the create/delete/list/describe-table.sh scripts in the /scripts directory. However, you will need the aws cli installed.
+
+From the root directory the following commands can be run
+```sh
+
+./scripts/list-tables.sh # list tables
+./scripts/create-table.sh # create table
+./scripts/delete-table.sh # delete table
+./scripts/describe-table.sh # describe table
+
+```
 ## Things to improve:
 
 - Extract provisioning logic elsewhere.
@@ -31,3 +45,4 @@ yarn start # start the api service locally on port 8080.
 - Current Cursor implementation only works since we're reading (No other crud operations). Ideally want a bidrectional cursor implementation.
 - GlobalSecondaryIndexes for ordering events correctly when scanning the DB, rely on a hardcoded Partition Key (type attribute) with a constant value equal to 'NasaEvent'. This would be problematic during high traffic as it would result in a 'hot partition'.
 - Use a proper logging service instead of just console.error and console.log.
+- Add Github actions and some CI/CD pipeline in the code base.
