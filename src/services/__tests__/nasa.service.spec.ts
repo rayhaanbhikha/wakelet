@@ -71,7 +71,7 @@ describe('Nasa Service', () => {
   
   const nasaService = new NasaService();
   
-  it('should fetch NasaEvents from api', async () => {
+  it('should fetch NasaEvents from api and format correctly', async () => {
     mock.onGet('/api/v3/events').reply(200, {
       events: [
         nasaEvent
