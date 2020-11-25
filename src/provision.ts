@@ -1,8 +1,9 @@
-import { dbService, DBSortBy } from "./db";
+import { dbService } from "./db";
 import { envs } from "./envs";
 import { nasaService } from "./services/nasa.service";
 
 export async function provisionDB() {
+  console.log("Provisioning DB");
   try {
     await dbService.createTable();
 

@@ -3,6 +3,7 @@ import { dbService } from './db';
 import { envs } from './envs';
 import { provisionDB } from './provision';
 import { decodeCursor } from './utils/cursor';
+import { validateLimit, validateOffsetId, validateSortBy } from './utils/validation';
 
 const app = express();
 
@@ -12,11 +13,13 @@ app.get("/health", (req, res) => {
 
 app.get("/v1/events", async (req, res) => {
   try {
-    let { sortBy, offsetId, limit } = req.query as { sortBy: string, offsetId: string, limit: string }
 
-    const cursor = offsetId ? decodeCursor(offsetId) : '';
+    const sortBy = validateSortBy(req.query.sortBy as string, '');
+    const offsetId = validateOffsetId(req.query.offsetId as string, '');
+    const scanLimit = validateLimit(req.query.limit as string, envs.DEFAULT_SCAN_LIMIT)
+
+    const cursor = decodeCursor(offsetId);
     const index = dbService.getIndex(sortBy);
-    const scanLimit = limit ? parseInt(limit) : envs.DEFAULT_SCAN_LIMIT
 
     console.log({ index: index?.name, cursor, limit: scanLimit })
 
@@ -24,7 +27,7 @@ app.get("/v1/events", async (req, res) => {
     
     res.json(result);
   } catch (error) {
-    console.error(error);
+    console.error(error.message);
     res.status(500).send("Server error");
   }
 });
