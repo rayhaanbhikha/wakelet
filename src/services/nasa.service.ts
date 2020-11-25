@@ -4,7 +4,7 @@ import { AxiosEventsAPIResponse, Event, Geometry } from './types';
 
 export type NasaEvent = Omit<Event, 'geometry'> & Geometry & { type: string };
 
-class NasaService {
+export class NasaService {
   private axios: AxiosInstance;
   constructor() {
     this.axios = axios.create({
@@ -14,7 +14,7 @@ class NasaService {
    }
   
   async getEventsFromAPI() {
-    const res = await this.axios.get<AxiosEventsAPIResponse>('api/v3/events', {
+    const res = await this.axios.get<AxiosEventsAPIResponse>('/api/v3/events', {
       params: {
         status: "OPEN",
         limit: envs.SEED_LIMIT
