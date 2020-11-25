@@ -7,4 +7,5 @@ export const envs = {
   DEFAULT_SCAN_LIMIT: parseInt(env('DEFAULT_SCAN_LIMIT', '2')),
   ENVIRONMENT: env('ENVIRONMENT', 'dev'),
   AWS_REGION: env('AWS_REGION', 'us-east-1'),
+  DYNAMO_DB_ENDPOINT: process.env.DYNAMO_DB_ENDPOINT
 }
