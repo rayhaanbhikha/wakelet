@@ -8,7 +8,7 @@ export const envs = {
     'https://eonet.sci.gsfc.nasa.gov',
   ),
   SEED_LIMIT: parseInt(env('SEED_LIMIT', '10')),
-  DEFAULT_SCAN_LIMIT: parseInt(env('DEFAULT_SCAN_LIMIT', '2')),
+  DEFAULT_SCAN_LIMIT: parseInt(env('DEFAULT_SCAN_LIMIT', '5')),
   ENVIRONMENT: env('ENVIRONMENT', 'dev'),
   AWS_REGION: env('AWS_REGION', 'us-east-1'),
   DYNAMO_DB_ENDPOINT: process.env.DYNAMO_DB_ENDPOINT,
