@@ -3,7 +3,12 @@ import { DocumentClient } from 'aws-sdk/clients/dynamodb';
 
 import { generateCursor } from '../utils/cursor';
 import { NasaEvent } from '../services/nasa.service';
-import { tableName, attributeKeyMap, globalSecondaryIndexMap, keySchema } from './config';
+import {
+  tableName,
+  attributeKeyMap,
+  globalSecondaryIndexMap,
+  keySchema,
+} from './config';
 import { GlobalSecondaryIndex } from './utils';
 import { envs } from '../envs';
 
@@ -14,9 +19,9 @@ export enum DBSortBy {
 }
 
 export interface IScanOptions {
-  index?: GlobalSecondaryIndex,
-  cursor?: DynamoDB.DocumentClient.Key,
-  limit: number
+  index?: GlobalSecondaryIndex;
+  cursor?: DynamoDB.DocumentClient.Key;
+  limit: number;
 }
 
 export class DBService {
@@ -26,9 +31,9 @@ export class DBService {
   constructor() {
     const clientConfig = {
       region: envs.AWS_REGION,
-      endpoint: process.env.DYNAMO_DB_ENDPOINT
-    }
-    this.client = new DocumentClient(clientConfig)
+      endpoint: process.env.DYNAMO_DB_ENDPOINT,
+    };
+    this.client = new DocumentClient(clientConfig);
     this.dbClient = new DynamoDB(clientConfig);
   }
 
@@ -36,22 +41,26 @@ export class DBService {
     return {
       TableName: tableName,
       KeySchema: keySchema,
-      AttributeDefinitions: Object.values(attributeKeyMap).map(attribute => attribute.definition),
-      GlobalSecondaryIndexes: Object.values(globalSecondaryIndexMap).map(index => index.definition),
-      BillingMode: "PAY_PER_REQUEST"
+      AttributeDefinitions: Object.values(attributeKeyMap).map(
+        attribute => attribute.definition,
+      ),
+      GlobalSecondaryIndexes: Object.values(globalSecondaryIndexMap).map(
+        index => index.definition,
+      ),
+      BillingMode: 'PAY_PER_REQUEST',
     };
   }
 
   async createTable() {
     try {
       const params: DynamoDB.CreateTableInput = this.createTableParams();
-      await this.dbClient.createTable(params).promise()
+      await this.dbClient.createTable(params).promise();
     } catch (error) {
       if (error?.code === 'ResourceInUseException') {
-        console.log(`${tableName} table already exists`)
-        return
+        console.log(`${tableName} table already exists`);
+        return;
       } else {
-        throw error
+        throw error;
       }
     }
   }
@@ -66,43 +75,42 @@ export class DBService {
               [attributeKeyMap.type.name]: 'nasaEvent',
               [attributeKeyMap.id.name]: nasaEvent.id,
               [attributeKeyMap.date.name]: nasaEvent.date,
-              [attributeKeyMap.title.name]: nasaEvent.title
-            }
-          }
-        }))
-      }
-    }
-    await this.client.batchWrite(params).promise()
+              [attributeKeyMap.title.name]: nasaEvent.title,
+            },
+          },
+        })),
+      },
+    };
+    await this.client.batchWrite(params).promise();
   }
 
   getIndex(sortBy: string) {
     switch (sortBy?.toLowerCase()) {
       case DBSortBy.Title:
-        return globalSecondaryIndexMap.TypeTitleIndex
+        return globalSecondaryIndexMap.TypeTitleIndex;
       case DBSortBy.Date:
-        return globalSecondaryIndexMap.TypeDateIndex
+        return globalSecondaryIndexMap.TypeDateIndex;
       case DBSortBy.Id:
-          return globalSecondaryIndexMap.TypeIdIndex
+        return globalSecondaryIndexMap.TypeIdIndex;
       default:
         return undefined;
     }
   }
 
-  async scan({index, cursor, limit}: IScanOptions) {
-
+  async scan({ index, cursor, limit }: IScanOptions) {
     const params: DynamoDB.DocumentClient.ScanInput = {
       TableName: tableName,
       Limit: limit,
       IndexName: index?.name,
-    }
+    };
 
     if (cursor) {
-      params.ExclusiveStartKey = cursor
+      params.ExclusiveStartKey = cursor;
     }
 
     const result = await this.client.scan(params).promise();
 
-    let newOffsetId = ''
+    let newOffsetId = '';
     if (result.LastEvaluatedKey) {
       newOffsetId = generateCursor(result.LastEvaluatedKey);
     }
@@ -110,8 +118,8 @@ export class DBService {
     return {
       data: result.Items,
       meta: {
-        offsetId: newOffsetId
-      }
+        offsetId: newOffsetId,
+      },
     };
   }
 }

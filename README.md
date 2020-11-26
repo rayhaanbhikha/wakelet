@@ -44,5 +44,7 @@ From the root directory the following commands can be run
 - Cursor (offsetId) is only encoded in base64, the technically leaks logic to the client. Should ideally be encrypted.
 - Current Cursor implementation only works since we're reading (No other crud operations). Ideally want a bidrectional cursor implementation.
 - GlobalSecondaryIndexes for ordering events correctly when scanning the DB, rely on a hardcoded Partition Key (type attribute) with a constant value equal to 'NasaEvent'. This would be problematic during high traffic as it would result in a 'hot partition'.
+- If the API was more complicated we could add custom middleware to handle errors thrown in the application.
+- proper e2e using something like supertest and only mocking out the end clients using nock for api requests and aws-sdk-mock for DB operations.
 - Use a proper logging service instead of just console.error and console.log.
 - Add Github actions and some CI/CD pipeline in the code base.

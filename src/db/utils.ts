@@ -1,28 +1,32 @@
-import { AttributeDefinition } from "aws-sdk/clients/dynamodb";
+import { AttributeDefinition } from 'aws-sdk/clients/dynamodb';
 
 export const generateHashKey = (key: string) => ({
   AttributeName: key,
-  KeyType: "HASH"
-})
+  KeyType: 'HASH',
+});
 
 export const generateRangeKey = (key: string) => ({
   AttributeName: key,
-  KeyType: "RANGE"
-})
+  KeyType: 'RANGE',
+});
 
-export class DBAttribute{
+export class DBAttribute {
   public definition: AttributeDefinition;
   constructor(public name: string, public type: string) {
     this.definition = {
       AttributeName: this.name,
-      AttributeType: this.type
-    }
+      AttributeType: this.type,
+    };
   }
 }
 
 export class GlobalSecondaryIndex {
-  constructor(public name: string, public hashAttribute: string, public rangeAttribute: string) { }
-  
+  constructor(
+    public name: string,
+    public hashAttribute: string,
+    public rangeAttribute: string,
+  ) {}
+
   get definition() {
     return {
       IndexName: this.name,
@@ -31,8 +35,8 @@ export class GlobalSecondaryIndex {
         generateRangeKey(this.rangeAttribute),
       ],
       Projection: {
-        ProjectionType: "ALL"
-      }
-    }
+        ProjectionType: 'ALL',
+      },
+    };
   }
 }
