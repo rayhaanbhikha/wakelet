@@ -1,4 +1,3 @@
-import { DBSortBy } from '..'
 import { formattedNasaEvent } from '../../__mocks__/nasa-event'
 import { globalSecondaryIndexMap } from '../config'
 
@@ -102,5 +101,98 @@ describe('DB service', () => {
 
   });
   
-  describe('Scan', () => {})
+  describe('Scan', () => {
+
+    it.each([
+      [
+        1,
+        {
+          index: globalSecondaryIndexMap.TypeIdIndex,
+          cursor: undefined,
+          limit: 10
+        },
+        {
+          TableName: 'NasaEvents',
+          Limit: 10,
+          IndexName: 'TypeIdIndex'
+        }
+      ],
+      [
+        2,
+        {
+          index: globalSecondaryIndexMap.TypeTitleIndex,
+          cursor: { key: 'some-key' },
+          limit: 10
+        },
+        {
+          TableName: 'NasaEvents',
+          Limit: 10,
+          IndexName: 'TypeTitleIndex',
+          ExclusiveStartKey: { key: 'some-key' }
+        }
+      ]
+    ])('should invoke scan with correct params - case %p', async (_, scanOptions, expectedParams) => {
+      const scanSpy = jest.fn().mockReturnValue({
+        promise: jest.fn().mockResolvedValue({})
+      });
+  
+      jest.mock('aws-sdk/clients/dynamodb', () => ({
+        DocumentClient: jest.fn().mockImplementation(() => ({
+          scan: scanSpy
+        }))
+      }));
+
+      const { DBService } = await import('../index');
+      const dbService = new DBService();
+      await dbService.scan(scanOptions);
+      expect(scanSpy).toHaveBeenCalledWith(expectedParams)
+    })
+
+    it.each([
+      [
+        1, 
+        {
+          Items: [{ foo: 'bar', baz: 'bong' }]
+        },
+        {
+          data: [{ foo: 'bar', baz: 'bong' }],
+          meta: {
+            offsetId: ''
+          }
+        }
+      ],
+      [
+        2, 
+        {
+          Items: [{ foo: 'bar', baz: 'bong' }],
+          LastEvaluatedKey: { foo: 'bar' }
+        },
+        {
+          data: [{ foo: 'bar', baz: 'bong' }],
+          meta: {
+            offsetId: 'eyJmb28iOiJiYXIifQ=='
+          }
+        }
+      ]
+    ])('should return scanned items with offset id set to empty string - case %p', async (_, mockScanResponse, expectedResponse) => {
+
+  
+      jest.mock('aws-sdk/clients/dynamodb', () => ({
+        DocumentClient: jest.fn().mockImplementation(() => ({
+          scan: jest.fn().mockReturnValue({
+            promise: jest.fn().mockResolvedValue(mockScanResponse)
+          })
+        }))
+      }));
+
+      const { DBService } = await import('../index');
+      const dbService = new DBService();
+      const result = await dbService.scan({
+        limit: 10,
+      });
+
+      expect(result).toEqual(expectedResponse)
+    })
+
+  })
 })
