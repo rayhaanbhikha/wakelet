@@ -7,6 +7,9 @@ describe('Provision', () => {
   const createTableSpy = jest
     .spyOn(dbService, 'createTable')
     .mockResolvedValue();
+  const dbWaitForTableSpy = jest
+    .spyOn(dbService, 'waitForTable')
+    .mockResolvedValue({} as any);
   const dbBatchWriteSpy = jest
     .spyOn(dbService, 'batchWrite')
     .mockResolvedValue();
@@ -14,17 +17,20 @@ describe('Provision', () => {
   const nasaGetEventsSpy = jest.spyOn(nasaService, 'getEventsFromAPI');
   const seedLimit = 2;
 
-  beforeEach(jest.clearAllMocks);
+  beforeEach(jest.resetAllMocks);
 
   it('should create table', async () => {
-    dbScanSpy.mockResolvedValue({
-      data: [{ foo: 'bar' }, { bar: 'baz' }],
-      meta: {
-        offsetId: '',
-      },
-    });
+    nasaGetEventsSpy.mockResolvedValue({} as any);
+    dbScanSpy.mockResolvedValue({} as any);
     await provisionDB(seedLimit);
     expect(createTableSpy).toHaveBeenCalled();
+  });
+
+  it('should wait for the table to exist', async () => {
+    nasaGetEventsSpy.mockResolvedValue({} as any);
+    dbScanSpy.mockResolvedValue({} as any);
+    await provisionDB(seedLimit);
+    expect(dbWaitForTableSpy).toHaveBeenCalled();
   });
 
   it('should fetch and write nasa events to db if under seed limit', async () => {
@@ -56,5 +62,14 @@ describe('Provision', () => {
 
     expect(nasaGetEventsSpy).not.toHaveBeenCalled();
     expect(dbBatchWriteSpy).not.toHaveBeenCalled();
+  });
+
+  it('should split nasa events into smaller batches of 25', async () => {
+    const mockNasaEvents = Array(100);
+    dbScanSpy.mockResolvedValue({} as any);
+    nasaGetEventsSpy.mockResolvedValue(mockNasaEvents);
+    await provisionDB(seedLimit);
+
+    expect(dbBatchWriteSpy).toHaveBeenCalledTimes(mockNasaEvents.length / 25);
   });
 });

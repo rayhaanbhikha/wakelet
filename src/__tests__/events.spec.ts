@@ -5,7 +5,7 @@ import { eventsHandler } from '../events';
 
 describe('Events Handler', () => {
   const dbScanSpy = jest.spyOn(dbService, 'scan');
-  beforeEach(jest.clearAllMocks);
+  beforeEach(jest.resetAllMocks);
 
   it.each([
     [
