@@ -37,6 +37,12 @@ export class DBService {
     this.dbClient = new DynamoDB(clientConfig);
   }
 
+  waitForTable() {
+    return this.dbClient
+      .waitFor('tableExists', { TableName: tableName })
+      .promise();
+  }
+
   createTableParams() {
     return {
       TableName: tableName,

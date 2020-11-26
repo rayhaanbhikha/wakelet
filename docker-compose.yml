@@ -13,6 +13,7 @@ services:
     ports:
       - 8080:8080
     environment:
+      - SEED_LIMIT=20
       - AWS_REGION=us-east-1
       - AWS_ACCESS_KEY_ID=some-key
       - AWS_SECRET_ACCESS_KEY=some-key
